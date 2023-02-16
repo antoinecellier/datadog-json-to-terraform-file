@@ -1,21 +1,52 @@
-# datadog-to-terraform
+This repo is a fork of https://github.com/juliogreff/datadog-to-terraform.
 
-A small utility to export Datadog dashboards and monitors to Terraform `.tf`
-resource config files.
+# datadog to terraform
 
-## Examples
+A simple utility to format a Datadog JSON export into a Terraform file.
 
-```console
-# to export a dashboard
-$ DD_API_KEY=xxx DD_APP_KEY=xxx go run . dashboard mnr-gsq-2em
-
-
-# to export a monitor
-$ DD_API_KEY=xxx DD_APP_KEY=xxx go run . monitor 20625761
+Commande to run:
+```
+go run . monitor "my_arlerting" test.json
 ```
 
-## hclencoder
+# Getting started
 
-This project uses my own fork of `rodaine/hclencoder` with support for
-serializing a slice of structs as a series of blocks, instead of assigning an
-array to an argument. Hopefully I'll get this upstreamed soon :D
+
+-  Export a monitor in Datadog
+
+![Export a monitor](export_monitor.png)
+
+- Copy paste the export in a json file and run the `main.go` file with appropriate arguments
+```
+go run . [dashboard|monitor] [ressource_name] [json_path]
+```
+
+- The output
+```
+resource "datadog_monitor" "ressource_name" {
+  type  = "query alert"
+  query = "sum(last_1d):(sum:trace.rack.request.errors{env:production,resource_name:paymentcontroller*}.as_count() * 100) / sum:trace.rack.request.hits{env:production,resource_name:paymentcontroller*}.as_count() > 0.05"
+  name  = "Third party error rate"
+
+  message = "@slack-my_team
+ 
+Third party error rate reached {{eval "value*100"}}%."
+
+  tags = [
+    "team",
+  ]
+
+  no_data_timeframe = 0
+  notify_audit      = false
+  notify_no_data    = false
+  renotify_interval = 0
+
+  monitor_thresholds {
+    critical = "0.05"
+    warning  = "0.005"
+  }
+
+  include_tags        = false
+  require_full_window = false
+}
+```

@@ -1,97 +1,57 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
-
+	"io/ioutil"
 	"github.com/rodaine/hclencoder"
 
 	"github.com/juliogreff/datadog-to-terraform/pkg/types"
 )
 
 const (
-	ddUrl = "https://api.datadoghq.com"
-
 	dashboardResource = "dashboard"
 	monitorResource   = "monitor"
 )
 
-func request(method, url string, headers map[string]string) (*http.Response, error) {
-	client := &http.Client{}
-	req, err := http.NewRequestWithContext(context.Background(), method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	for k, v := range headers {
-		req.Header.Add(k, v)
-	}
-
-	return client.Do(req)
-}
-
 func main() {
+	var err error
+
 	args := os.Args[1:]
-	apiKey := os.Getenv("DD_API_KEY")
-	appKey := os.Getenv("DD_APP_KEY")
 
-	if len(args) != 2 {
-		fail("usage: dd2hcl [dashboard|monitor] [id]")
-	}
-
-	if len(apiKey) < 1 {
-		fail("DD_API_KEY environment variable is required but was not set")
-	}
-
-	if len(appKey) < 1 {
-		fail("DD_APP_KEY environment variable is required but was not set")
+	if len(args) != 3 {
+		fail("usage: dd2hcl [dashboard|monitor] [ressource_name] [json_path]")
 	}
 
 	resourceType := args[0]
-	resourceId := args[1]
-
-	path := fmt.Sprintf("%s/api/v1/%s/%s", ddUrl, resourceType, resourceId)
-	headers := map[string]string{
-		"Content-Type":       "application/json",
-		"DD-API-KEY":         apiKey,
-		"DD-APPLICATION-KEY": appKey,
-	}
-
-	resp, err := request(http.MethodGet, path, headers)
+	resourceName := args[1]
+	jsonFile, err := os.Open(args[2])
 	if err != nil {
-		fail("%s %s: unable to get resource: %s", resourceType, resourceId, err)
+		fmt.Println(err)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fail("%s %s: unable to read response body: %s", resourceType, resourceId, err)
-	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
 
-	if resp.StatusCode != http.StatusOK {
-		fail("%s %s: %s: %s", resourceType, resourceId, resp.Status, body)
-	}
+	defer jsonFile.Close()
 
-	resource := types.Resource{Name: resourceId}
+	resource := types.Resource{Name: resourceName}
 
 	switch resourceType {
 	case dashboardResource:
 		var dashboard *types.Board
-		err = json.Unmarshal(body, &dashboard)
+		err = json.Unmarshal(byteValue, &dashboard)
 		if err != nil {
-			fail("%s %s: unable to parse JSON: %s", resourceType, resourceId, err)
+			fail("%s %s: unable to parse JSON: %s", resourceType, err)
 		}
 
 		resource.Type = "datadog_dashboard"
 		resource.Board = dashboard
 	case monitorResource:
 		var monitor *types.Monitor
-		err = json.Unmarshal(body, &monitor)
+		err = json.Unmarshal(byteValue, &monitor)
 		if err != nil {
-			fail("%s %s: unable to parse JSON: %s", resourceType, resourceId, err)
+			fail("%s %s: unable to parse JSON: %s", resourceType, err)
 		}
 
 		resource.Type = "datadog_monitor"
@@ -102,7 +62,7 @@ func main() {
 		Resource: resource,
 	})
 	if err != nil {
-		fail("%s %s: unable to encode hcl: %s", resourceType, resourceId, err)
+		fail("%s %s: unable to encode hcl: %s", resourceType, err)
 	}
 
 	fmt.Println(string(hcl))

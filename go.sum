@@ -3,6 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
+github.com/juliogreff/datadog-to-terraform v0.0.0-20211210143330-1d3ca0e41da6 h1:FPHAYNe3gkrrM2WQWR/jSRzeWpYC68BLxyEjJTdjuGU=
+github.com/juliogreff/datadog-to-terraform v0.0.0-20211210143330-1d3ca0e41da6/go.mod h1:l+dYZ8M6REB1l/FjN0Qp4gQ8x2RrSAC3dd2rPloDX8k=
 github.com/juliogreff/hclencoder v0.0.0-20201005124953-d013916b798c h1:cepWT+JPQ4XDywjiz1+MC6l78LLh/gq0hVC2+57l+dQ=
 github.com/juliogreff/hclencoder v0.0.0-20201005124953-d013916b798c/go.mod h1:XKt85p0Ifyt0pr1KVeB3eL+dUFAKa+IA637lLahBcOQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

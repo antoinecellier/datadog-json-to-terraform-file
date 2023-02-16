@@ -1,0 +1,25 @@
+{
+	"id": 1,
+	"name": "Third party error rate",
+	"type": "query alert",
+	"query": "sum(last_1d):(sum:trace.rack.request.errors{env:production,resource_name:paymentcontroller*}.as_count() * 100) / sum:trace.rack.request.hits{env:production,resource_name:paymentcontroller*}.as_count() > 0.05",
+	"message": "@slack-my_team\n \nThird party error rate reached {{eval \"value*100\"}}%.",
+	"tags": [
+		"team"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 0.05,
+			"warning": 0.005
+		},
+		"notify_audit": false,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"include_tags": false,
+		"notification_preset_name": "hide_query",
+		"silenced": {}
+	},
+	"priority": null,
+	"restricted_roles": null
+}
